@@ -11,7 +11,7 @@ const CONFIG_KEYS = {
     AUTH_TOKEN: 'qr_scanner_auth_token',
     USER_DATA: 'qr_scanner_user_data',
     CAMERA_ID: 'qr_scanner_camera_id',
-    SESSION_ID: 'qr_scanner_session_id'
+    CAMERA_ID: 'qr_scanner_camera_id'
 };
 
 let html5QrcodeScanner = null;
@@ -49,9 +49,8 @@ const elements = {
     scanNextBtn: document.getElementById('scanNextBtn'),
     loadingOverlay: document.getElementById('loadingOverlay'),
     scannerWrapper: document.getElementById('scannerWrapper'),
-    connectSessionBtn: document.getElementById('connectSessionBtn'),
-    disconnectSessionBtn: document.getElementById('disconnectSessionBtn'),
-    sessionStatus: document.getElementById('sessionStatus'),
+    scannerWrapper: document.getElementById('scannerWrapper'),
+    // Connect Session removed as per request
     manualInput: document.getElementById('manualInput'),
     manualSubmitBtn: document.getElementById('manualSubmitBtn')
 };
@@ -117,18 +116,7 @@ function setupEventListeners() {
     elements.stopScanBtn.addEventListener('click', stopScanning);
     elements.scanNextBtn.addEventListener('click', resetScanner);
 
-    if (elements.connectSessionBtn) {
-        elements.connectSessionBtn.addEventListener('click', () => {
-            scanMode = 'SESSION';
-            startScanning();
-            showStatus('Scan the Librarian\'s Session QR Code', 'info');
-            elements.connectSessionBtn.style.display = 'none';
-        });
-    }
-
-    if (elements.disconnectSessionBtn) {
-        elements.disconnectSessionBtn.addEventListener('click', disconnectSession);
-    }
+    // Session connect listeners removed
 
     if (elements.manualSubmitBtn) {
         elements.manualSubmitBtn.addEventListener('click', handleManualSubmit);
@@ -151,68 +139,7 @@ function handleManualSubmit() {
     elements.manualInput.value = '';
 }
 
-function initSocket() {
-    if (socket) return;
-
-    const token = localStorage.getItem(CONFIG_KEYS.AUTH_TOKEN);
-    if (!token) return;
-
-    // Use the same base URL as API but for socket
-    const socketUrl = CONFIG.API_URL;
-
-    // We need socket.io client. If it's not loaded, this will fail.
-    if (typeof io !== 'undefined') {
-        socket = io(socketUrl, {
-            auth: { token }
-        });
-
-        socket.on('connect', () => {
-            console.log('Socket connected');
-            // Rejoin session if exists?
-        });
-
-        socket.on('session_joined', (data) => {
-            console.log('Joined session:', data.sessionId);
-            currentSessionId = data.sessionId;
-            localStorage.setItem(CONFIG_KEYS.SESSION_ID, currentSessionId);
-            updateSessionUI(true);
-            showStatus('Connected to session!', 'success');
-            scanMode = 'BOOK'; // Reset to book mode
-            resetScannerUI();
-        });
-
-        socket.on('session_error', (data) => {
-            showStatus(data.message, 'error');
-            scanMode = 'BOOK';
-            resetScannerUI();
-        });
-    } else {
-        console.warn('Socket.IO client not found');
-    }
-}
-
-function joinSession(sessionId) {
-    if (socket && socket.connected) {
-        socket.emit('join_checkin_session', sessionId);
-    }
-}
-
-function disconnectSession() {
-    currentSessionId = null;
-    localStorage.removeItem(CONFIG_KEYS.SESSION_ID);
-    updateSessionUI(false);
-    showStatus('Disconnected from session', 'info');
-}
-
-function updateSessionUI(connected) {
-    if (connected) {
-        elements.sessionStatus.style.display = 'block';
-        if (elements.connectSessionBtn) elements.connectSessionBtn.style.display = 'none';
-    } else {
-        elements.sessionStatus.style.display = 'none';
-        if (elements.connectSessionBtn) elements.connectSessionBtn.style.display = 'inline-flex';
-    }
-}
+// Session management removed
 
 // Handle login
 async function handleLogin(e) {
@@ -417,12 +344,7 @@ function onScanSuccess(decodedText, decodedResult) {
     stopScanning();
 
     // Process the barcode
-    // Process the barcode
-    if (scanMode === 'SESSION') {
-        joinSession(decodedText);
-    } else {
-        processCheckIn(decodedText);
-    }
+    processCheckIn(decodedText);
 }
 
 // Handle scan errors (usually just no QR code in view)
@@ -450,8 +372,7 @@ async function processCheckIn(barcode) {
                 'Authorization': `Bearer ${authToken}`
             },
             body: JSON.stringify({
-                book_item_barcode: barcode,
-                session_id: currentSessionId // Add session ID if present
+                book_item_barcode: barcode
             })
         });
 

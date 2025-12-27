@@ -46,10 +46,14 @@ const elements = {
     resultDetails: document.getElementById('resultDetails'),
     scanNextBtn: document.getElementById('scanNextBtn'),
     loadingOverlay: document.getElementById('loadingOverlay'),
+    scanNextBtn: document.getElementById('scanNextBtn'),
+    loadingOverlay: document.getElementById('loadingOverlay'),
     scannerWrapper: document.getElementById('scannerWrapper'),
     connectSessionBtn: document.getElementById('connectSessionBtn'),
     disconnectSessionBtn: document.getElementById('disconnectSessionBtn'),
-    sessionStatus: document.getElementById('sessionStatus')
+    sessionStatus: document.getElementById('sessionStatus'),
+    manualInput: document.getElementById('manualInput'),
+    manualSubmitBtn: document.getElementById('manualSubmitBtn')
 };
 
 // Initialize app
@@ -125,6 +129,26 @@ function setupEventListeners() {
     if (elements.disconnectSessionBtn) {
         elements.disconnectSessionBtn.addEventListener('click', disconnectSession);
     }
+
+    if (elements.manualSubmitBtn) {
+        elements.manualSubmitBtn.addEventListener('click', handleManualSubmit);
+    }
+}
+
+function handleManualSubmit() {
+    const value = elements.manualInput.value.trim();
+    if (!value) {
+        showStatus('Please enter a value', 'error');
+        return;
+    }
+
+    console.log('Manual Submit:', value);
+
+    // Simulate scan success
+    onScanSuccess(value, null);
+
+    // Clear input
+    elements.manualInput.value = '';
 }
 
 function initSocket() {

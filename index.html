@@ -122,9 +122,18 @@
                     <button id="connectSessionBtn" class="btn btn-secondary">Connect to Session</button>
                 </div>
 
-                <div class="status-message" id="statusMessage">
-                    Ready to scan. Click "Start Camera" to begin
+                <div class="manual-entry"
+                    style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--glass-border);">
+                    <p style="margin-bottom: 0.5rem; text-align: center; color: var(--text-secondary);">Manual Entry
+                        (Testing)</p>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="manualInput" class="input-field"
+                            placeholder="Enter barcode or session ID">
+                        <button id="manualSubmitBtn" class="btn btn-primary" style="flex: 0 0 auto;">Submit</button>
+                    </div>
                 </div>
+
+                <div id="statusMessage" class="status-message">Ready to scan properly</div>
             </div>
 
             <!-- Result Section -->
